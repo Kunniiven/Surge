@@ -2,10 +2,6 @@ name: Build WeatherKit next-hour fallback bundle
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/build-weatherkit-next-hour.yml
 
 permissions:
   contents: write
@@ -73,4 +69,4 @@ jobs:
           git commit -m "Build next-hour-only WeatherKit fallback bundle"
           git push
 
-# Triggered after workflow registration.
+# Manual-only: NSRingo v3.2.0 currently depends on GitHub Packages authentication.
