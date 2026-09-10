@@ -1,0 +1,61 @@
+name: Sync Naisi adblock module
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/sync-naisi-adblock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+
+      - name: Download upstream module
+        run: |
+          mkdir -p module
+          curl -fL --retry 3 \
+            'https://raw.githubusercontent.com/dqzboy/Loon_Surge_Rule/refs/heads/main/module/surge_modules/%E5%A5%B6%E6%80%9D%E5%8E%BB%E5%B9%BF%E5%91%8A%E5%90%88%E9%9B%86.sgmodule' \
+            -o 'module/奶思去广告合集.sgmodule'
+
+      - name: Disable broken Keep bottom bar rewrite
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('module/奶思去广告合集.sgmodule')
+          lines = p.read_text(encoding='utf-8').splitlines()
+          needle = r'api\.gotokeep\.com\/config\/v\d\/basic'
+          found = 0
+          out = []
+
+          for line in lines:
+              if needle in line and not line.lstrip().startswith('#'):
+                  out.append('# [Kunniiven] 已禁用：新版 Keep 使用此底栏净化规则会导致底部导航异常')
+                  out.append('# ' + line)
+                  found += 1
+              else:
+                  out.append(line)
+
+          if found != 1:
+              raise SystemExit(f'Expected exactly one Keep bottom-bar rewrite rule, found {found}')
+
+          p.write_text('\n'.join(out) + '\n', encoding='utf-8')
+
+      - name: Commit patched module
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'module/奶思去广告合集.sgmodule'
+          if git diff --cached --quiet; then
+            echo 'No module changes'
+            exit 0
+          fi
+          git commit -m 'Add Naisi adblock module with Keep bottom bar fix'
+          git push
