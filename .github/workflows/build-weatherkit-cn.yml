@@ -1,4 +1,4 @@
-name: Build WeatherKit custom bundles
+name: Build WeatherKit custom bundle
 
 on:
   workflow_dispatch:
@@ -65,46 +65,14 @@ jobs:
           s = light.sub(r'Math.max(.101,Math.min(1,(\1-\2.LIGHT[0])/(\2.LIGHT[1]-\2.LIGHT[0])))', s, count=1)
           p.write_text(s)
 
-      - name: Checkout WeatherKit v3.2.0 source
-        uses: actions/checkout@v4
-        with:
-          repository: NSRingo/WeatherKit
-          ref: v3.2.0
-          path: weatherkit-v320
-
-      - name: Build next-hour-only v3.2.0 response bundle
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('weatherkit-v320/src/process/Response.mjs')
-          s = p.read_text()
-          old = '''parameters.dataSets.map(async dataSet => {
-                                        switch (dataSet) {'''
-          new = '''parameters.dataSets.map(async dataSet => {
-                                        // Non-CN fallback bundle: preserve every Apple dataset except forecastNextHour.
-                                        if (dataSet !== "forecastNextHour") return;
-                                        switch (dataSet) {'''
-          if s.count(old) != 1:
-              raise SystemExit(f'Expected one dataset dispatch block, found {s.count(old)}')
-          p.write_text(s.replace(old, new, 1))
-          PY
-          cd weatherkit-v320
-          npm install --no-audit --no-fund
-          npm run build
-          cd ..
-          cp weatherkit-v320/dist/response.bundle.js "weather kit/weatherkit-next-hour-only.bundle.js"
-          grep -q 'Version: 3.2.0' "weather kit/weatherkit-next-hour-only.bundle.js"
-
-      - name: Commit custom bundles
+      - name: Commit custom bundle
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "weather kit/weatherkit-cn-response.bundle.js" "weather kit/weatherkit-next-hour-only.bundle.js"
+          git add "weather kit/weatherkit-cn-response.bundle.js"
           if git diff --cached --quiet; then
             echo "No bundle changes"
             exit 0
           fi
-          git commit -m "Update WeatherKit custom response bundles"
+          git commit -m "Update WeatherKit custom response bundle"
           git push
