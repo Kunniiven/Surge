@@ -19,32 +19,90 @@ jobs:
 
       - name: Download upstream module
         run: |
-          mkdir -p module
+          rm -rf module
+          mkdir -p '去广告'
           curl -fL --retry 3 \
             'https://raw.githubusercontent.com/dqzboy/Loon_Surge_Rule/refs/heads/main/module/surge_modules/%E5%A5%B6%E6%80%9D%E5%8E%BB%E5%B9%BF%E5%91%8A%E5%90%88%E9%9B%86.sgmodule' \
-            -o 'module/奶思去广告合集.sgmodule'
+            -o '去广告/奶思去广告合集.sgmodule'
 
-      - name: Disable broken Keep bottom bar rewrite
+      - name: Apply local patches
         shell: python
         run: |
           from pathlib import Path
 
-          p = Path('module/奶思去广告合集.sgmodule')
+          p = Path('去广告/奶思去广告合集.sgmodule')
           lines = p.read_text(encoding='utf-8').splitlines()
-          needle = r'api\.gotokeep\.com\/config\/v\d\/basic'
-          found = 0
+
+          keep_needle = r'api\.gotokeep\.com\/config\/v\d\/basic'
+          xhs_quic = 'AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT'
+          xhs_surprisebox = r'edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox'
+          remove_xhs_hosts = {
+              'www.xiaohongshu.com',
+              'edith.xiaohongshu.com',
+              'ci.xiaohongshu.com',
+              'so.xiaohongshu.com',
+          }
+          xhs_script = (
+              '小红书首页信息流去广告 = type=http-response, '
+              'pattern=^https?:\\/\\/rec\\.xiaohongshu\\.com\\/api\\/sns\\/v6\\/homefeed(?:\\?|$), '
+              'script-path=https://raw.githubusercontent.com/Kunniiven/Surge/main/%E5%8E%BB%E5%B9%BF%E5%91%8A/%E5%B0%8F%E7%BA%A2%E4%B9%A6%E5%8E%BB%E5%B9%BF%E5%91%8A.js, '
+              'requires-body=true, timeout=10'
+          )
+
           out = []
+          keep_found = 0
+          quic_removed = 0
+          xhs_scripts_removed = 0
+          script_inserted = False
 
           for line in lines:
-              if needle in line and not line.lstrip().startswith('#'):
+              stripped = line.strip()
+
+              if keep_needle in line and not line.lstrip().startswith('#'):
                   out.append('# [Kunniiven] 已禁用：新版 Keep 使用此底栏净化规则会导致底部导航异常')
                   out.append('# ' + line)
-                  found += 1
-              else:
-                  out.append(line)
+                  keep_found += 1
+                  continue
 
-          if found != 1:
-              raise SystemExit(f'Expected exactly one Keep bottom-bar rewrite rule, found {found}')
+              if stripped == xhs_quic:
+                  quic_removed += 1
+                  continue
+
+              if 'xiaohongshu.js' in line:
+                  xhs_scripts_removed += 1
+                  continue
+
+              if xhs_surprisebox in line:
+                  continue
+
+              if line.startswith('hostname = %APPEND% '):
+                  prefix = 'hostname = %APPEND% '
+                  hosts = [host.strip() for host in line[len(prefix):].split(',')]
+                  hosts = [host for host in hosts if host not in remove_xhs_hosts]
+                  line = prefix + ', '.join(hosts)
+
+              out.append(line)
+
+              if stripped == '[Script]' and not script_inserted:
+                  out.append('# > 小红书（精简：仅首页信息流去广告）')
+                  out.append(xhs_script)
+                  script_inserted = True
+
+          if keep_found != 1:
+              raise SystemExit(f'Expected exactly one Keep bottom-bar rewrite rule, found {keep_found}')
+          if quic_removed != 1:
+              raise SystemExit(f'Expected exactly one Xiaohongshu QUIC reject rule, found {quic_removed}')
+          if xhs_scripts_removed == 0:
+              raise SystemExit('No upstream Xiaohongshu script rules were removed')
+          if not script_inserted:
+              raise SystemExit('Could not find [Script] section for Xiaohongshu rule')
+
+          mitm_lines = [line for line in out if line.startswith('hostname = %APPEND% ')]
+          if not mitm_lines or 'rec.xiaohongshu.com' not in mitm_lines[0]:
+              raise SystemExit('rec.xiaohongshu.com must remain in MITM hosts')
+          for host in remove_xhs_hosts:
+              if host in mitm_lines[0]:
+                  raise SystemExit(f'Xiaohongshu MITM host was not removed: {host}')
 
           p.write_text('\n'.join(out) + '\n', encoding='utf-8')
 
@@ -52,10 +110,10 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add 'module/奶思去广告合集.sgmodule'
+          git add -A
           if git diff --cached --quiet; then
             echo 'No module changes'
             exit 0
           fi
-          git commit -m 'Add Naisi adblock module with Keep bottom bar fix'
+          git commit -m 'Sync Naisi adblock module with local patches'
           git push
