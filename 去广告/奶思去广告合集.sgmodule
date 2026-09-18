@@ -1774,7 +1774,8 @@ https?:\/\/awg\.enmonster\.com\/apa\/(advert\/demand\/home\/poster|index\/advert
 ^https?:\/\/s\.jiediankeji\.com\/adv data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # hostname = api.gotokeep.com, kad.gotokeep.com, static1.keepcdn.com
-^https?:\/\/static1\.keepcdn\.com\/ark_optimus\/202\d\/*\/*\/.*.(png|jpg) data-type=text data=" " status-code=200
+# [Kunniiven] 临时恢复 Keep ark_optimus 图片资源，便于定位 GO 按钮图片
+# ^https?:\/\/static1\.keepcdn\.com\/ark_optimus\/202\d\/*\/*\/.*.(png|jpg) data-type=text data=" " status-code=200
 
 # hostname = api.kkmh.com
 ^https?:\/\/api\.kkmh\.com\/v\d\/ad\/show data-type=text data=" " status-code=200
