@@ -6,14 +6,14 @@
 #   - blackmatrix7/ios_rule_script Instagram.list
 #   - blackmatrix7/ios_rule_script Threads.list
 #   - blackmatrix7/ios_rule_script Whatsapp.list
-# MANUAL CURRENT ADDITIONS: threads.com, meta.ai
+# MANUAL CURRENT ADDITIONS: threads.com, meta.ai, metaaivm.com, muse.ai
 # UPDATED: 2026-09-27
 # DOMAIN: 1
-# DOMAIN-SUFFIX: 548
+# DOMAIN-SUFFIX: 550
 # DOMAIN-KEYWORD: 4
 # IP-CIDR: 34
 # IP-ASN: 1
-# TOTAL: 588
+# TOTAL: 590
 DOMAIN,graph.facebook.com
 DOMAIN-SUFFIX,aboutfacebook.com
 DOMAIN-SUFFIX,accessfacebookfromschool.com
@@ -484,9 +484,11 @@ DOMAIN-SUFFIX,messenger.com
 DOMAIN-SUFFIX,messengerdevelopers.com
 DOMAIN-SUFFIX,meta.ai
 DOMAIN-SUFFIX,meta.com
+DOMAIN-SUFFIX,metaaivm.com
 DOMAIN-SUFFIX,midentsolutions.com
 DOMAIN-SUFFIX,mobilefacebook.com
 DOMAIN-SUFFIX,moneywithfacebook.com
+DOMAIN-SUFFIX,muse.ai
 DOMAIN-SUFFIX,myfbfans.com
 DOMAIN-SUFFIX,nbabot.net
 DOMAIN-SUFFIX,newsfeed.com
