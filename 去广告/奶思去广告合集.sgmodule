@@ -5,6 +5,16 @@
 #!date=2026-06-04 17:17:00
 
 [Rule]
+# > 酷狗音乐
+DOMAIN,adserviceretry.kglink.cn,REJECT
+DOMAIN,adservice.kugou.com,REJECT
+DOMAIN,adserviceretry.kugou.com,REJECT
+DOMAIN,ads.service.kugou.com,REJECT
+DOMAIN,adsfileretry.service.kugou.com,REJECT
+DOMAIN,adsfile.bssdlbig.kugou.com,REJECT
+DOMAIN,adsfilebssdlbig.ali.kugou.com,REJECT
+DOMAIN,adsfilebssdlbig.tx.kugou.com,REJECT
+DOMAIN,splashimgbssdl.yun.kugou.com,REJECT
 DOMAIN,api.biliapi.com,REJECT
 DOMAIN,app.biliapi.com,REJECT
 DOMAIN,api.biliapi.net,REJECT
