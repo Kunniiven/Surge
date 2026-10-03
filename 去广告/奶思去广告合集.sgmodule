@@ -270,6 +270,8 @@ IP-CIDR,118.89.204.198/32,REJECT,no-resolve
 IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve
 
 [URL Rewrite]
+# > 酷狗音乐
+^http:\/\/ads.?s?ervice(retry)?\.(kugou|kglink)\.(com|cn)\/v\d\/ - reject-200
 #^https?:\/\/gab\.122\.gov\.cn\/eapp\/m\/sysquery reject
 ^https?:\/\/gab\.122\.gov\.cn\/eapp\/m\/sysquery\/adver$ - reject
 # hostname = api.21jingji.com
